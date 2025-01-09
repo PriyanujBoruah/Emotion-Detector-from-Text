@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<h1 class="title-index"><span class="gradient-text">Emotion</span> Analysis<br>from Text</h1>
+
+<form method="post">
+    <p for="text" class="label-index">Get detailed emotion detection with <span class="non-gradient-text">28 emotion tags</span> and <span class="non-gradient-text">probabilities</span></p>
+    <div class="form-container-index">
+        <textarea class="input-index" name="text" id="text" rows="5" placeholder="Enter text here...">{{ text or '' }}</textarea>
+        <hr>
+        <button type="submit" class="button-index">Analyze Emotion ▶</button>
+    </div>
+</form>
+
+{% if emotion_predictions %}
+    <h2>Predictions:</h2>
+    {% if emotion_predictions.get('Error') %}  {# Check for error key #}
+        <p style="color: red;">{{ emotion_predictions['Error'] }}</p>
+    {% else %}
+        <ul>
+            {% for emotion, score in emotion_predictions.items() %}
+                {% set display_emotion = emotion %}
+                <li>
+                     {{ display_emotion }}: 
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ (score * 100)|round(0) }}%;" 
+                             aria-valuenow="{{ (score * 100)|round(0) }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ (score * 100)|round(0) }}%
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endif %}
+
+<h2>Previous Analyses</h2>
+{% if analyses %}
+    <div class="accordion" id="analysesAccordion"> {## added accordion for previous analyses ##}
+        {% for analysis in analyses %}
+            <div class="card">
+                <div class="card-header" id="heading{{ analysis.id }}">
+                    <h2 class="mb-0">
+                        <button id="card-button-index" class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{ analysis.id }}" aria-expanded="true" aria-controls="collapse{{ analysis.id }}">
+                            {{ analysis.text }}
+                        </button>
+                    </h2>
+                </div>
+
+                <div id="collapse{{ analysis.id }}" class="collapse" aria-labelledby="heading{{ analysis.id }}" data-parent="#analysesAccordion">
+                    <div class="card-body">
+                        <ul>
+                            {% set emotions = analysis.emotion_stats | from_json %}
+                            {% for emotion, score in emotions.items() %}
+                                {% set display_emotion = emotion %}
+                                <li>
+                                    {{ display_emotion }}:
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ (score * 100)|round(0) }}%;"
+                                            aria-valuenow="{{ (score * 100)|round(0) }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ (score * 100)|round(0) }}%
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+{% else %}
+    <p>No previous analyses found.</p>
+{% endif %}
+{% endblock %}
