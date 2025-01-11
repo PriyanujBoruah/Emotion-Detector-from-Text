@@ -45,7 +45,7 @@ class Analysis(db.Model):
     emotion_stats = db.Column(db.Text, nullable=False)  # Store as JSON string
 
 
-@login_manager.user_loader  # Tells Flask-Login how to load users
+@login_manager.user_loader  # Load users
 def load_user(user_id):
     return User.query.get(int(user_id))
 
